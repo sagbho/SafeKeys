@@ -51,7 +51,6 @@ export function EditDialog({ id }: { id: string }) {
           throw new Error(`Error: ${res.status}`);
         }
         const data = await res.json();
-        console.log("data", data);
         form.setValue("service", data.service);
         form.setValue("email", data.email);
         form.setValue("password", decryptPassword(data.password));
@@ -64,7 +63,7 @@ export function EditDialog({ id }: { id: string }) {
     if (id) {
       fetchPassword();
     }
-  }, [id]);
+  }, [form, id]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {

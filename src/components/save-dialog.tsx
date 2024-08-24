@@ -23,9 +23,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Password } from "@/types";
+import { useEffect } from "react";
+import { useToast } from "./ui/use-toast";
 
 const formSchema = z.object({
   service: z.string().min(1, { message: "Service is required." }),
@@ -35,8 +36,16 @@ const formSchema = z.object({
   }),
 });
 
-export function AddDialog({ onAdd }: { onAdd: (password: Password) => void }) {
+export function SaveDialog({
+  onSave,
+  generatedPassword,
+}: {
+  onSave: (password: Password) => void;
+  generatedPassword: string;
+}) {
   const router = useRouter();
+  const passedInPassword = generatedPassword;
+  const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,6 +54,10 @@ export function AddDialog({ onAdd }: { onAdd: (password: Password) => void }) {
       password: "",
     },
   });
+
+  useEffect(() => {
+    form.setValue("password", passedInPassword);
+  }, [passedInPassword]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -62,29 +75,37 @@ export function AddDialog({ onAdd }: { onAdd: (password: Password) => void }) {
         throw new Error(`Error: ${response.status} - ${errorData.error}`);
       }
 
-      //error check
       const newPassword = await response.json();
 
-      toast("Password has been added.");
-      onAdd(newPassword);
+      toast({
+        title: "Password saved",
+        description: "Password saved successfully",
+      });
+      onSave(newPassword);
       form.reset();
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast(`Failed to add password: ${(error as Error).message}`);
+      toast({
+        title: "Failed to add password",
+        description: (error as Error).message,
+      });
     }
+    form.reset();
   }
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Password</Button>
+        <Button className="bg-green-500 hover:bg-green-600">
+          Save to Vault
+        </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Password</DialogTitle>
+          <DialogTitle>Save Password</DialogTitle>
           <DialogDescription>
-            Add a new password to your vault.
+            Save this password to your vault.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -131,7 +152,7 @@ export function AddDialog({ onAdd }: { onAdd: (password: Password) => void }) {
 
             <DialogFooter>
               <Button type="submit" className="primary">
-                Add Password
+                Save Password
               </Button>
               <DialogClose asChild>
                 <Button type="button">Close</Button>

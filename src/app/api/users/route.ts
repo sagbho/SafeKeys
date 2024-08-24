@@ -7,13 +7,11 @@ import { UserData } from "../../../types";
 export async function POST(req: NextRequest) {
   try {
     const userId = await getUserId();
-    console.log("User ID:", userId);
     const userDocRef = doc(db, "users", userId);
     const userDocSnap = await getDoc(userDocRef);
 
     if (!userDocSnap.exists()) {
       const user = await getCurrentUser();
-      console.log("Current User:", user);
       const userData: UserData = {
         name: `${user.firstName} ${user.lastName}`,
         email: user.emailAddresses[0].emailAddress,

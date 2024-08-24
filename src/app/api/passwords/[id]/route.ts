@@ -49,7 +49,6 @@ export async function PUT(
     }
 
     const passwordRef = doc(db, `users/${userId}/passwords`, params.id);
-    console.log("passwordRef", passwordRef);
     const encryptedPassword = encryptPassword(password);
 
     await updateDoc(passwordRef, {

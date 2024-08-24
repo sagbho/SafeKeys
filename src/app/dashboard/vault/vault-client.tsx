@@ -7,6 +7,7 @@ import { AddDialog } from "@/components/add-dialog";
 import { ColumnDef } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { decryptPassword } from "@/lib/crypto";
 
 export default function VaultClient() {
   const [passwords, setPasswords] = useState<Password[]>([]);
@@ -23,8 +24,12 @@ export default function VaultClient() {
   }, []);
 
   const handleAdd = (newPassword: Password) => {
-    setPasswords((prev) => [...prev, newPassword]);
-    console.log(newPassword);
+    const decryptedPassword = decryptPassword(newPassword.password);
+    setPasswords((prev) => [
+      ...prev,
+      { ...newPassword, password: decryptedPassword },
+    ]);
+
     // router.push("/dashboard/vault");
   };
 
